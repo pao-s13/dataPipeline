@@ -100,3 +100,17 @@ ambas. El pipeline completo tarda unos 15 s.
 `scripts/goodreads_adapter.py` convierte los datasets públicos de Goodreads (UCSD Book Graph) al
 esquema del pipeline, y `--preset sparse` ajusta las reglas para fuentes con solo fecha de inicio y
 de fin. Mapeo, resultados de la corrida con poesía y limitaciones en [docs/goodreads.md](docs/goodreads.md).
+
+## Ejecutar en GitHub Codespaces (sin Python local)
+
+El repositorio incluye `.devcontainer/devcontainer.json`: al crear un codespace desde **Code ›
+Codespaces › Create codespace on main**, se instala Python 3.12 y las dependencias de
+`requirements.txt`. Luego, en la terminal del codespace:
+
+```bash
+bash scripts/get_goodreads.sh          # descarga ~230 MB y genera data/goodreads_pipeline/
+python -m reading_pipeline.run --preset sparse \
+    --logs data/goodreads_pipeline/reading_logs.csv \
+    --catalog data/goodreads_pipeline/catalog.csv --out data/goodreads_output
+pytest -q
+```
