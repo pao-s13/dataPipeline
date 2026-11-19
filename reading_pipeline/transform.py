@@ -175,7 +175,9 @@ def tag_binge(m: pd.DataFrame, cfg: PipelineConfig) -> pd.DataFrame:
     """
     quick = ((m["sessions_to_finish"] <= cfg.binge_max_sessions)
              | (m["hours_to_finish"] <= cfg.binge_max_span_hours))
-    covered = (m["start_progress_pct"] <= cfg.binge_max_start_pct) & (m["reading_minutes"] > 0)
+    covered = m["start_progress_pct"] <= cfg.binge_max_start_pct
+    if cfg.binge_require_reading_time:
+        covered &= m["reading_minutes"] > 0
     m["is_binge"] = m["finished"] & covered & quick
     return m
 

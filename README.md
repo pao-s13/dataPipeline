@@ -94,3 +94,9 @@ ambas. El pipeline completo tarda unos 15 s.
 - `tests/test_large_dataset.py`: millones de eventos sintéticos; valida la reducción ≥ 70% en la
   carga y en el pipeline completo, y mide precisión y exhaustividad de abandono y binge contra la
   verdad conocida del generador.
+
+## Datos reales: Goodreads
+
+`scripts/goodreads_adapter.py` convierte los datasets públicos de Goodreads (UCSD Book Graph) al
+esquema del pipeline, y `--preset sparse` ajusta las reglas para fuentes con solo fecha de inicio y
+de fin. Mapeo, resultados de la corrida con poesía y limitaciones en [docs/goodreads.md](docs/goodreads.md).

@@ -26,3 +26,19 @@ class PipelineConfig:
     # Para contar como binge, la lectura observada debe empezar en este % o antes
     # (evita que un "finish" aislado o una sesión que arranca en 85% cuente).
     binge_max_start_pct: float = 10.0
+    # Exigir tiempo de lectura medido > 0 para el binge. En logs de app es la regla;
+    # en fuentes dispersas (solo inicio y fin, p. ej. Goodreads) no hay eventos
+    # intermedios y el tiempo de lectura no es medible, así que se desactiva.
+    binge_require_reading_time: bool = True
+
+    @classmethod
+    def sparse_events(cls) -> "PipelineConfig":
+        """Preset para fuentes con solo eventos de inicio y fin (sin progreso intermedio).
+
+        * Abandono: como no hay % intermedio, el rango 40-60% no es observable; se
+          usa [0, 0] = empezó y nunca registró avance ni fin (proxy de abandono).
+        * Binge: se mide por el lapso inicio -> fin (<= 24 h), sin exigir tiempo de
+          lectura, que con dos eventos separados por horas siempre es 0.
+        """
+        return cls(dropoff_min_pct=0.0, dropoff_max_pct=0.0,
+                   binge_require_reading_time=False)
