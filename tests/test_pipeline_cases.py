@@ -118,7 +118,7 @@ def test_ca4_binge_single_session_or_short_span(outputs):
     _, o = outputs
     b = o["binge_by_user_book"]
     assert set(zip(b.user_id, b.book_id)) == {(5, 20), (7, 30)}
-    assert pair(b, 5, 20).n_sessions == 1
+    assert pair(b, 5, 20).sessions_to_finish == 1
     by_book = o["binge_by_book"].set_index("book_id")
     assert by_book.loc[20].completions == 2 and by_book.loc[20].binge_completions == 1
 

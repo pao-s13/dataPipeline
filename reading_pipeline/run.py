@@ -19,16 +19,15 @@ def run(logs_path: Path, catalog_path: Path, out_dir: Path,
     t0 = time.time()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    logs = io.load_logs(logs_path)
-    catalog = io.load_catalog(catalog_path)
-    report = {"config": asdict(cfg), "logs_memory_mb": round(io.memory_mb(logs), 2)}
-
-    logs, q = transform.clean(logs)
-    report.update(q)
+    logs, q = io.load_logs(logs_path)
+    catalog, qc = io.load_catalog(catalog_path)
+    report = {"config": asdict(cfg), "logs_memory_mb": round(io.memory_mb(logs), 2), **q, **qc}
     report["orphan_events"] = int((~logs["book_id"].isin(catalog["book_id"])).sum())
 
     logs, d = transform.deduplicate(logs, cfg)
     report.update(d)
+    logs, f = transform.fill_progress(logs)
+    report.update(f)
 
     logs = transform.sessionize(logs, cfg)
     metrics = transform.user_book_metrics(logs, cfg)
@@ -66,6 +65,7 @@ def main():
     ap.add_argument("--dropoff-max", type=float, default=60)
     ap.add_argument("--dropoff-inactivity-days", type=int, default=30)
     ap.add_argument("--binge-max-span-hours", type=float, default=24)
+    ap.add_argument("--binge-max-start-pct", type=float, default=10)
     ap.add_argument("--reference-date", default=None,
                     help="Fecha de corte para el abandono (por defecto, el último evento)")
     a = ap.parse_args()
@@ -74,6 +74,7 @@ def main():
         dropoff_min_pct=a.dropoff_min, dropoff_max_pct=a.dropoff_max,
         dropoff_inactivity_days=a.dropoff_inactivity_days,
         binge_max_span_hours=a.binge_max_span_hours,
+        binge_max_start_pct=a.binge_max_start_pct,
     )
     print(json.dumps(run(a.logs, a.catalog, a.out, cfg, a.reference_date), indent=2, default=str))
 
