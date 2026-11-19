@@ -66,16 +66,22 @@ def main():
     ap.add_argument("--dropoff-inactivity-days", type=int, default=30)
     ap.add_argument("--binge-max-span-hours", type=float, default=24)
     ap.add_argument("--binge-max-start-pct", type=float, default=10)
+    ap.add_argument("--preset", choices=["app", "sparse"], default="app",
+                    help="app: logs de la aplicación (default). sparse: fuentes con solo "
+                         "inicio y fin, como Goodreads (ver PipelineConfig.sparse_events)")
     ap.add_argument("--reference-date", default=None,
                     help="Fecha de corte para el abandono (por defecto, el último evento)")
     a = ap.parse_args()
-    cfg = PipelineConfig(
-        session_gap_minutes=a.session_gap_minutes,
-        dropoff_min_pct=a.dropoff_min, dropoff_max_pct=a.dropoff_max,
-        dropoff_inactivity_days=a.dropoff_inactivity_days,
-        binge_max_span_hours=a.binge_max_span_hours,
-        binge_max_start_pct=a.binge_max_start_pct,
-    )
+    if a.preset == "sparse":
+        cfg = PipelineConfig.sparse_events()
+    else:
+        cfg = PipelineConfig(
+            session_gap_minutes=a.session_gap_minutes,
+            dropoff_min_pct=a.dropoff_min, dropoff_max_pct=a.dropoff_max,
+            dropoff_inactivity_days=a.dropoff_inactivity_days,
+            binge_max_span_hours=a.binge_max_span_hours,
+            binge_max_start_pct=a.binge_max_start_pct,
+        )
     print(json.dumps(run(a.logs, a.catalog, a.out, cfg, a.reference_date), indent=2, default=str))
 
 
